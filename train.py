@@ -14,13 +14,14 @@ from unet import SSM5311
 from dataset import ME5311Dataset
 from utils import * 
 from distutils.util import strtobool
+from config import *
 
 parser = argparse.ArgumentParser(description="train the shear prediction model")
 txt2bool = lambda x:bool(strtobool(x))
 
 parser.add_argument("--seed_value",     default=1000, type=int, nargs='?', help="training seeds")
 parser.add_argument("--lr",             default=1e-3, type=float, nargs='?', help="learning rate")
-parser.add_argument("--weight_decay",   default=5e-5, type=float, nargs='?', help="weight decay for the Adam optimizer")
+parser.add_argument("--weight_decay",   default=1e-4, type=float, nargs='?', help="weight decay for the Adam optimizer")
 parser.add_argument("--bs",             default=128, type=int, nargs='?', help="batch size")
 parser.add_argument("--epoch",          default=50, type=int, nargs='?', help="total epoch number")
 parser.add_argument("--data_type",      default="addthis", type=str, nargs='?', help="total epoch number")
@@ -53,6 +54,7 @@ ds_path = "updated_processed_data_w_interpolation" # dataset path
 
 
 def train_model(model, train_loader, test_loader, num_epochs, learning_rate):
+    torch.cuda.empty_cache()
     # create the tensorboard log directory
     log_dir = os.path.join("train_logs", writer_dir)
     writer = SummaryWriter(log_dir=log_dir)
@@ -81,15 +83,19 @@ def train_model(model, train_loader, test_loader, num_epochs, learning_rate):
 
                 x_new, y = x_new.to(torch.float32).to(device), y.to(torch.float32).to(device)
                 optimizer.zero_grad()
-                outputs = model(x_new)
+                outputs, mu, logvar = model(x_new)
                 outputs = reshape_back(outputs)
+                # print(outputs.min().cpu(), outputs.max().cpu(), logvar.max().cpu())
 
+                kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=-1)
+                # loss_reg = outputs.mean() ** 2
                 loss = loss_fcn(outputs, y)
                 loss.backward()
+                # nn.utils.clip_grad_norm_(model.parameters(), 1)
                 optimizer.step()
 
                 # Print loss
-                running_loss += loss.item()
+                running_loss += loss.item() + 2 * kl_loss.mean()
                 t.set_description(f"Epoch {epoch+1}/{num_epochs}, Loss: {running_loss / (i + 1):.4g}")
 
         # Log loss to tensorboard
@@ -127,7 +133,7 @@ def train_model(model, train_loader, test_loader, num_epochs, learning_rate):
                                           'Loss/baseline': baseline_loss / len(test_loader)}, epoch+1, 
             )
 
-        file_path = os.path.join(save_dir, f"model_{mean_validation_loss:.4g}" + ".pth")
+        file_path = os.path.join(save_dir, f"model_{epoch+1:02}_{mean_validation_loss:.4g}" + ".pth")
         torch.save(model.state_dict(), file_path)
 
 
@@ -144,6 +150,6 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_set, batch_size=bs, shuffle=True)
     test_loader = DataLoader(test_set, batch_size=bs, shuffle=True)
     
-    model = SSM5311()
+    model = SSM5311(down_channels=global_down_chnl)
     print(f"Total param number: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
     train_model(model, train_loader, test_loader, num_epochs=epoch, learning_rate=lr)

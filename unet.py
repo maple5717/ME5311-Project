@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import math
 from torch.nn import functional as F 
+from config import *
 
 # code reference: https://colab.research.google.com/drive/1sjy9odlSSy0RBVgMTgP7s99NXsqglsUL?usp=sharing
 
@@ -129,10 +130,10 @@ class UNet(nn.Module):
         return self.decode(enc)
     
 class SSM5311(nn.Module):
-    def __init__(self, img_size=(80, 80)):
+    def __init__(self, img_size=reshape_size, **kwargs):
         super().__init__()
 
-        self.unet = UNet(img_size=img_size)
+        self.unet = UNet(img_size=img_size, **kwargs)
 
 
         test_data = torch.randn(1, 1, img_size[0], img_size[1])
@@ -149,10 +150,10 @@ class SSM5311(nn.Module):
 
     def forward(self, x):
         B, T, H, W = x.shape
-        x = x.reshape(B*T, H, W).unsqueeze(1) # [B*T, 1, H, W]
+        x_ = x.reshape(B*T, H, W).unsqueeze(1) # [B*T, 1, H, W]
 
         # get embedding
-        embd = self.unet.encode(x)
+        embd = self.unet.encode(x_)
         # embd = self.last_conv_down(embd)
         _, Cemb, Hemb, Wemb = embd.shape
 
@@ -174,9 +175,12 @@ class SSM5311(nn.Module):
         # embd_new = self.last_conv_up(embd_new)
 
 
-        dec =  self.unet.decode(embd_new)
- 
-        return dec.reshape(B, T, H, W)
+        dec = self.unet.decode(embd_new)
+
+        if self.training:
+            return x+dec.reshape(B, T, H, W), mu, logvar
+        else:
+            return x+dec.reshape(B, T, H, W)
 
 if __name__ == "__main__":
     from utils import * 

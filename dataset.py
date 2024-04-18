@@ -8,7 +8,7 @@ SLP_ERR_SCALE = 300
 T2M_ERR_SCALE = 1.5
 
 class ME5311Dataset(Dataset):
-    def __init__(self, dir="data", train=True, type="slp", t_size=11, use_err=True):
+    def __init__(self, dir="data", train=True, type="slp", t_size=21, use_err=True):
         train_str = "_train_" if train else "_test_"
         err_str = "err" if use_err else ""
         file_name = type + train_str + err_str + ".npy"
@@ -21,7 +21,7 @@ class ME5311Dataset(Dataset):
         
         # Load the numpy file
         self.data = np.load(file_path) / SLP_ERR_SCALE
-        self.data = np.clip(self.data, -1, 1)
+        # self.data = np.clip(self.data, -1, 1)
         self.t_size = t_size 
          
     def __len__(self):
