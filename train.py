@@ -50,7 +50,7 @@ torch.cuda.manual_seed_all(seed_value)
 
 # save directory of tensorboard logs
 writer_dir = f"logs/{data_type}{err_str}_models"
-ds_path = "updated_processed_data_w_interpolation" # dataset path
+# ds_path = "updated_processed_data_w_interpolation" # dataset path
 
 
 def train_model(model, train_loader, test_loader, num_epochs, learning_rate):
@@ -61,7 +61,7 @@ def train_model(model, train_loader, test_loader, num_epochs, learning_rate):
     print("training log will be saved to: ", log_dir)
 
     # create the directory for saving the model
-    save_dir = f"saved_models/{data_type}{err_str}"
+    save_dir = f"saved_models_no_unet/{data_type}{err_str}"
 
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -86,16 +86,19 @@ def train_model(model, train_loader, test_loader, num_epochs, learning_rate):
                 outputs, mu, logvar = model(x_new)
                 outputs = reshape_back(outputs)
                 # print(outputs.min().cpu(), outputs.max().cpu(), logvar.max().cpu())
-
+                
                 kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=-1)
+
+                # ab=logvar.detach().exp(); print("var:", ab.min(), ab.mean(), ab.max(), 
+                #                                 "\nkl_loss", kl_loss.detach().mean(), "\nmu", mu.detach().mean())
                 # loss_reg = outputs.mean() ** 2
-                loss = loss_fcn(outputs, y)
+                loss = loss_fcn(outputs, y) + 0.01 * kl_loss.mean()
                 loss.backward()
                 # nn.utils.clip_grad_norm_(model.parameters(), 1)
                 optimizer.step()
 
                 # Print loss
-                running_loss += loss.item() + 2 * kl_loss.mean()
+                running_loss += loss.item()
                 t.set_description(f"Epoch {epoch+1}/{num_epochs}, Loss: {running_loss / (i + 1):.4g}")
 
         # Log loss to tensorboard

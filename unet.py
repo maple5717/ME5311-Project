@@ -6,32 +6,7 @@ from config import *
 
 # code reference: https://colab.research.google.com/drive/1sjy9odlSSy0RBVgMTgP7s99NXsqglsUL?usp=sharing
 
-class Block(nn.Module):
-    def __init__(self, in_ch, out_ch, time_emb_dim, up=False):
-        super().__init__()
-        self.time_mlp =  nn.Linear(time_emb_dim, out_ch)
-        conv_size = 5
-        stride = 2
-        padding = int((conv_size-1)/2)
-        if up:
-            self.conv1 = nn.Conv2d(2*in_ch, out_ch, conv_size, stride=stride, padding=padding)
-            self.transform = nn.ConvTranspose2d(out_ch, out_ch, 4, stride, padding)
-        else:
-            self.conv1 = nn.Conv2d(in_ch, out_ch, conv_size, stride=stride, padding=padding)
-            self.transform = nn.Conv2d(out_ch, out_ch, 4, stride, padding)
-        self.conv2 = nn.Conv2d(out_ch, out_ch, conv_size, stride=stride, padding=padding)
-        self.bnorm1 = nn.BatchNorm2d(out_ch)
-        self.bnorm2 = nn.BatchNorm2d(out_ch)
-        self.relu  = nn.ReLU()
 
-    def forward(self, x):
-        # First Conv
-        h = self.bnorm1(self.relu(self.conv1(x)))
-
-        # Second Conv
-        h = self.bnorm2(self.relu(self.conv2(h)))
-        # Down or Upsample
-        return self.transform(h)
 class Block(nn.Module):
     def __init__(self, in_ch, out_ch, time_emb_dim, up=False):
         super().__init__()
@@ -186,7 +161,7 @@ class SSM5311(nn.Module):
 if __name__ == "__main__":
     from utils import * 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = SSM5311().to(device)
+    model = SSM5311(down_channels=global_down_chnl).to(device)
     print(f"UNetnumber: {sum(p.numel() for p in model.unet.parameters() if p.requires_grad)}")
     print(f"Total param number: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
     # exit()
@@ -194,8 +169,9 @@ if __name__ == "__main__":
     sample_data = reshape_to_square(sample_data)
     model.train()
     print("a")
-    a = model(sample_data)
+    a, _, _ = model(sample_data)
     print("b")
-    a =reshape_back(a)
+    print(a.shape)
+    # a =reshape_back(a)
     print(a.shape)
     # print(model(sample_data).shape)
