@@ -129,6 +129,7 @@ class UNet(nn.Module):
         enc = self.encode(x)
         return self.decode(enc)
     
+    
 class SSM5311(nn.Module):
     def __init__(self, img_size=reshape_size, **kwargs):
         super().__init__()
