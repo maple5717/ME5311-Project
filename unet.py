@@ -115,7 +115,7 @@ class SSM5311(nn.Module):
         test_data = torch.randn(1, 1, img_size[0], img_size[1])
         x = self.unet.encode(test_data)
 
-
+        print(x.shape)
         self.z_dim = math.prod(x.shape)
 
         # self.last_conv_down = nn.Conv2d(x.shape[1], 2, kernel_size=1)

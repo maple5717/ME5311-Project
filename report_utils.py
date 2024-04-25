@@ -33,7 +33,17 @@ test_data = slp_test.reshape(-1, H*W)
 threshold = 1.5e7
 unit = "Pa"
 
+train_data_slp = slp_train.reshape(-1, H*W)
+test_data_slp = slp_test.reshape(-1, H*W)
+threshold = 1.5e7
+unit = "Pa"
+
 # train_data = t2m_train.reshape(-1, H*W)
 # test_data = t2m_test.reshape(-1, H*W)
 # threshold = 6e4
 # unit = "℃"
+
+train_data_t2m = t2m_train.reshape(-1, H*W)
+test_data_t2m = t2m_test.reshape(-1, H*W)
+threshold_t2m = 6e4
+unit_t2m = "℃"
