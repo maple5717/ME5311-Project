@@ -87,7 +87,8 @@ def calculate_correlation(start_year, n):
 
 start_year = 1979
 end_year = 2022
-n = 2
+n = 2 #
+As n increases, the correlation analysis becomes increasingly affected by noise, especially when n reaches 43 (noise-correlation_plot_1979-2021.png). The best processing performance is achieved when n equals 2.
 
 # List to store correlation matrices
 correlation_matrices = []
