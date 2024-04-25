@@ -7,12 +7,10 @@ from scipy.stats import pearsonr
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 from scipy.stats import linregress
-from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from matplotlib.colors import Normalize
-import matplotlib.animation as animation
 
 
 
@@ -120,6 +118,8 @@ example_correlation_matrix = correlation_matrices[0][2]
 n_latitudes, n_longitudes = example_correlation_matrix.shape
 
 # Strong linear correlation point filtering
+# Based on 'time-slp-t2m' , it was observed that the Pearson correlation coefficients for all pixels are consistently negative, indicating a persistent negative correlation. However, due to the wide range of variations in most coefficients over time, clustering analysis is not suitable for identifying spatial correlations. Therefore, it is proposed to restrict the range and select pixels with strong correlation coefficients (which may could serve as prior models).
+
 # Loop through each pixel
 for i in range(n_latitudes):
     for j in range(n_longitudes):
@@ -132,6 +132,7 @@ for i in range(n_latitudes):
             correlation_coefficient = correlation_matrix[i, j]
 
             # If the correlation coefficient is not within the specified range, set the flag to False and break out of the inner loop
+            # when -1 <= correlation_coefficient <= -0.7, define it as a strong negative correlation
             if not (-1 <= correlation_coefficient <= -0.7):
                 satisfies_condition = False
                 break
