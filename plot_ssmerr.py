@@ -44,27 +44,27 @@ ax1.set_xticklabels(categories)
 
 for bar in bars_slp_baseline:
     yval = bar.get_height()
-    ax1.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom')
+    ax1.text(bar.get_x() + bar.get_width()/2/3, yval, round(yval, 2), va='bottom')
 
 for bar in bars_slp_fft:
     yval = bar.get_height()
-    ax1.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom')
+    ax1.text(bar.get_x() + bar.get_width()/2/3, yval, round(yval, 2), va='bottom')
 
 for bar in bars_slp_predict:
     yval = bar.get_height()
-    ax1.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom')
+    ax1.text(bar.get_x() + bar.get_width()/2/3, yval, round(yval, 2), va='bottom')
 
 for bar in bars_t2m_baseline:
     yval = bar.get_height()
-    ax2.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom')
+    ax2.text(bar.get_x() + bar.get_width()/3, yval, round(yval, 2), va='bottom')
 
 for bar in bars_t2m_fft:
     yval = bar.get_height()
-    ax2.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom')
+    ax2.text(bar.get_x() + bar.get_width()/3, yval, round(yval, 2), va='bottom')
 
 for bar in bars_t2m_predict:
     yval = bar.get_height()
-    ax2.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom')
+    ax2.text(bar.get_x() + bar.get_width()/3, yval, round(yval, 2), va='bottom')
 
 plt.title('Prediction accuracy of the SSM model')
 plt.show()

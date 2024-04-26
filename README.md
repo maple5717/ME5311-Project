@@ -1,3 +1,5 @@
+# ME5311 Project: Climate Data Analysis #
+
 '''
 python train.py --data_type slp
 '''
