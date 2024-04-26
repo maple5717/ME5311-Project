@@ -4,3 +4,4 @@ data/*
 saved_models*/
 train_logs/
 *.npy
+*.npz
