@@ -123,8 +123,10 @@ def train_model(model, train_loader, test_loader, num_epochs, learning_rate):
                     outputs = reshape_back(outputs)
                     loss = loss_fcn(outputs, y)
                     loss_b = loss_fcn(x, y)
-                    validation_loss += loss.item()
-                    baseline_loss += loss_b.item()
+                    # validation_loss += loss.item()
+                    # baseline_loss += loss_b.item()
+                    validation_loss += torch.abs(outputs - y)[:, -1].mean().item() * 1.5
+                    baseline_loss += torch.abs(x - y)[:, -1].mean().item() * 1.5
                     t.set_description(f"Baseline loss: {baseline_loss / (i+1):.4g}, Loss: {validation_loss / (i + 1):.4g}")
 
             # Log validation loss to tensorboard
